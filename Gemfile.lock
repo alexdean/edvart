@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    colorize (0.8.1)
     domain_name (0.5.20161129)
       unf (>= 0.0.5, < 1.0.0)
     http-cookie (1.0.3)
@@ -30,6 +31,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  colorize
   marc
   nokogiri
   rest-client

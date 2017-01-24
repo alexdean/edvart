@@ -4,12 +4,15 @@
 # script runs until interrupted.
 # primary intent is to receive input from a barcode scanner.
 
+require 'io/console'
 require 'thread'
 require 'logger'
 require 'nokogiri'
 require 'rest-client'
 require 'marc'
 require 'time'
+require 'colorize'
+require 'sqlite3'
 
 # discovery at http://lx2.loc.gov:210/LCDB
 # example query:
@@ -21,8 +24,16 @@ trap('SIGINT') do
 end
 
 log = Logger.new($stdout).tap { |l| l.level = Logger::INFO }
+db = SQLite3::Database.new 'out/unknowns.sqlite'
 
-def find_and_write_marc(isbn, log)
+db.execute <<-EOF
+  CREATE TABLE IF NOT EXISTS unknowns (
+    id TEXT NOT NULL PRIMARY KEY,
+    last_scanned_at TEXT NOT NULL
+  )
+EOF
+
+def find_and_write_marc(isbn, log, db)
   begin
     base_query = {
       version: '1.1',
@@ -40,7 +51,8 @@ def find_and_write_marc(isbn, log)
     document.remove_namespaces!
 
     if document.xpath('//numberOfRecords').text.to_i == 0
-      log.warn "#{isbn} : not found."
+      log.warn "\a#{isbn} : not found.".colorize(:light_red)
+      db.query("REPLACE INTO unknowns (id, last_scanned_at) VALUES (?, ?)", isbn, Time.now.utc.iso8601)
       return
     end
 
@@ -65,13 +77,15 @@ def find_and_write_marc(isbn, log)
     writer.close
 
     # print the title. http://www.loc.gov/marc/bibliographic/bd20x24x.html
-    log.info "#{isbn} : finished. '#{marc['245']['a']}'"
+    log.info "\a#{isbn} : finished. '#{marc['245']['a']}'".colorize(:light_green)
   rescue => e
-    log.error "#{isbn} : #{e.class} #{e.message} "
+    log.error "\a#{isbn} : #{e.class} #{e.message} ".colorize(:light_red)
   end
 end
 
+log.info "Started. Enter ISBN numbers now."
+
 loop do
-  isbn = gets.strip
-  Thread.new { find_and_write_marc(isbn, log) }
+  isbn = STDIN.noecho{ gets }.strip
+  Thread.new { find_and_write_marc(isbn, log, db) }
 end
