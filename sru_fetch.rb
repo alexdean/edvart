@@ -17,7 +17,8 @@ require 'sqlite3'
 # discovery at http://lx2.loc.gov:210/LCDB
 # example query:
 #   http://lx2.loc.gov:210/lcdb?version=1.1&operation=searchRetrieve&query=bath.isbn=9780306824777&recordSchema=marcxml&maximumRecords=1
-
+#   can also search by bath.lccn=
+#   http://lx2.loc.gov:210/lcdb?version=1.1&operation=searchRetrieve&recordSchema=marcxml&maximumRecords=1&query=bath.lccn=68008971
 trap('SIGINT') do
   puts 'exiting.'
   exit
@@ -84,8 +85,20 @@ def find_and_write_marc(isbn, log, db)
 end
 
 log.info "Started. Enter ISBN numbers now."
+log.info "Hit Enter to toggle input echoing."
 
+no_echo = true
 loop do
-  isbn = STDIN.noecho{ gets }.strip
-  Thread.new { find_and_write_marc(isbn, log, db) }
+  if no_echo
+    input = STDIN.noecho{ gets }.strip
+  else
+    input = gets.strip
+  end
+
+  if input == ""
+    no_echo = !no_echo
+    log.info "echo #{no_echo ? 'off' : 'on'}"
+  else
+    Thread.new { find_and_write_marc(isbn, log, db) }
+  end
 end
