@@ -92,7 +92,7 @@ def find_and_write_marc(input, log, db)
       ['c', Time.now.utc.iso8601]
     )
 
-    writer = MARC::Writer.new("out/#{input.gsub(':', '-')}.marc")
+    writer = MARC::Writer.new("out/marc/#{input.gsub(':', '-')}.marc")
     writer.write(marc)
     writer.close
 
