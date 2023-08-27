@@ -8,6 +8,10 @@ require 'csv'
 
 csv_filename = 'out/call_numbers.csv'
 
+if !File.exist?(csv_filename)
+  File.open(csv_filename, 'w') { |fp| fp.write("isbn,title,author,lccn\n") }
+end
+
 known_isbns = Set.new
 CSV.foreach(csv_filename, headers: true) do |row|
   isbn = row['isbn'].to_s
