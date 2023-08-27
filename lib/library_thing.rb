@@ -1,12 +1,15 @@
 require 'net/http'
 require 'nokogiri'
 require 'fileutils'
-require_relative 'search_result'
+require_relative 'book'
 
 module LibraryThing
   class Client
-    def initialize
+    attr_reader :log
+
+    def initialize(logger: nil)
       @host = "https://www.librarything.com"
+      @log = logger || Logger.new('/dev/null')
     end
 
     def search(isbn)
@@ -15,33 +18,48 @@ module LibraryThing
       html = Nokogiri::HTML(body)
 
       target_href_prefix = '/lcc'
-      lccn_path = html.css('a').map { |a| a['href'] }.find { |href| href.to_s.start_with?(target_href_prefix) }
-      lccn = lccn_path[(target_href_prefix.size+1)..]
+      lcc_path = html.css('a').map { |a| a['href'] }.find { |href| href.to_s.start_with?(target_href_prefix) }
+      lcc = nil
+      if lcc_path
+        lcc = lcc_path[(target_href_prefix.size+1)..]
+      end
 
       title = html.css('div.headsummary').css('h1').text
       author = html.css('div.headsummary').css('h2').text.gsub(/^by /, '')
 
-      SearchResult.new(
+      Book.new(
         isbn: isbn,
         title: title,
         author: author,
-        lccn: lccn
+        lcc: lcc,
+        source_url: source_url(work_path),
+        local_resource: cache_key(work_path)
       )
     end
 
-    def fetch(path)
+    private
+
+    def source_url(path)
+      "#{@host}/#{path}"
+    end
+
+    def cache_key(path)
       if path[0] == '/'
         path = path[1..]
       end
 
-      cache_key = "out/library_thing_cache/#{path}"
+      "out/library_thing_cache/#{path}"
+    end
 
-      body = read_cache(cache_key)
+    def fetch(path)
+      key = cache_key(path)
+
+      body = read_cache(key)
 
       if !body
-        uri = URI("#{@host}/#{path}")
+        uri = URI(source_url(path))
         body = Net::HTTP.get(uri)
-        write_cache(cache_key, body)
+        write_cache(key, body)
       end
 
       body

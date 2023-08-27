@@ -1,0 +1,78 @@
+# script receives UPC/EAN/ISBN numbers on stdin
+# and tries to fetch a MARC record for each.
+#
+# script runs until interrupted.
+# primary intent is to receive input from a barcode scanner.
+
+require 'io/console'
+require 'thread'
+require 'logger'
+require 'time'
+require 'colorize'
+require_relative 'lib/library_thing'
+require_relative 'lib/loc_sru'
+require_relative 'lib/open_library'
+require_relative 'lib/book'
+
+trap('SIGINT') do
+  puts 'exiting.'
+  exit
+end
+
+log = Logger.new($stdout).tap { |l| l.level = Logger::INFO }
+Book.db = 'out/books.sqlite'
+
+def search_and_store(input, log)
+  begin
+    log.info "#{input} : start."
+
+    if Book.exist?(input)
+      log.info "isbn #{input} already present in local db."
+      # return
+    end
+
+    clients = [
+      LocSru::Client.new(logger: log),
+      LibraryThing::Client.new(logger: log),
+      OpenLibrary::Client.new(logger: log)
+    ]
+
+    book = Book.new
+    clients.each do |client|
+      log.info "isbn #{input} trying #{client.class.name}."
+      book = client.search(input)
+      if book.valid?
+        break
+      end
+    end
+
+    book.persist
+
+    if book.valid?
+      log.info "\a#{input} : finished. '#{book.title}' #{book.local_resource}".colorize(:light_green)
+    else
+      log.warn "\a#{input} : not found.".colorize(:light_red)
+    end
+  rescue => e
+    log.error "\a#{input} : #{e.class} #{e.message} #{e.backtrace.join("\n")}".colorize(:light_red)
+  end
+end
+
+log.info "Started. Enter ISBN numbers now."
+log.info "Hit Enter to toggle input echoing."
+
+no_echo = true
+loop do
+  if no_echo
+    input = STDIN.noecho{ gets }.strip
+  else
+    input = gets.strip
+  end
+
+  if input == ""
+    no_echo = !no_echo
+    log.info "echo #{no_echo ? 'off' : 'on'}"
+  else
+    Thread.new { search_and_store(input, log) }
+  end
+end
