@@ -1,0 +1,235 @@
+-
+  host: z3950.loc.gov
+  port: 7090
+  db_name: Voyager
+  organization: Library of Congress
+-
+  host: catnyp.nypl.org
+  port: 210
+  db_name: INNOPAC
+  organization: New York Pub Lib
+-
+  host: amicus.collectionscanada.ca
+  port: 210
+  db_name: NL
+  organization: Lib & Archives Canada
+-
+  host: aleph.mcgill.ca
+  port: 210
+  db_name: MUSE
+  organization: McGill
+-
+  host: ualapp.library.ualberta.ca
+  port: 2200
+  db_name: unicorn
+  organization: U Alberta
+-
+  host: portage.library.ubc.ca
+  port: 7090
+  db_name: voyager
+  organization: UBC
+-
+  host: sirsi.library.utoronto.ca
+  port: 2200
+  db_name: unicorn
+  organization: U Toronto
+-
+  host: ipac.lib.uchicago.edu
+  port: 210
+  db_name: usmarc
+  organization: Chicago
+-
+  host: library.mit.edu
+  port: 9909
+  db_name: mit01pub
+  organization: MIT
+-
+  host: prodorbis.library.yale.edu
+  port: 7090
+  db_name: voyager
+  organization: Yale
+-
+  host: catalog.princeton.edu
+  port: 7090
+  db_name: voyager
+  organization: Princeton
+-
+  host: www.saclibrarycatalog.org
+  port: 210
+  db_name: INNOPAC
+  organization: Sacramento Pub Lib
+-
+  host: library.bu.edu
+  port: 210
+  db_name: INNOPAC
+  organization: Boston U
+-
+  host: voyager.wrlc.org
+  port: 7090
+  db_name: voyager
+  organization: Wash Res Lib Consor
+-
+  host: catalog.lib.jhu.edu
+  port: 210
+  db_name: horizon
+  organization: Johns Hopkins
+-
+  host: z3950.lib.umich.edu
+  port: 210
+  db_name: miu01_pub
+  organization: U Michigan
+-
+  host: catalog.library.cornell.edu
+  port: 7090
+  db_name: voyager
+  organization: Cornell
+-
+  host: library.ucc.ie
+  port: 210
+  db_name: INNOPAC
+  organization: U College Cork
+-
+  host: library.ox.ac.uk
+  port: 210
+  db_name: MAIN*BIBMAST
+  organization: Oxford
+-
+  host: z3950.nls.uk
+  port: 7290
+  db_name: voyager
+  organization: Scottish Nat Lib
+-
+  host: lib-15.lse.ac.uk
+  port: 7090
+  db_name: voyager
+  organization: LSE
+-
+  host: libsys.lib.hull.ac.uk
+  port: 210
+  db_name: INNOPAC
+  organization: Hull
+-
+  host: sigma.nkp.cz
+  port: 9909
+  db_name: NKC
+  organization: Nat Lib Czech R
+-
+  host: lib.mpib-berlin.mpg.de
+  port: 2020
+  db_name: opac
+  organization: Max Planck Inst
+-
+  host: ubsun02.biblio.etc.tu-bs.de
+  port: 2020
+  db_name: bac
+  organization: Bibliotheken Berlins
+-
+  host: z3950.kb.dk
+  port: 2100
+  db_name: KGL01
+  organization: Kongelige Bibliothek
+-
+  host: www.bne.es
+  port: 2210
+  db_name: BIMO
+  organization: Nat Lib Spain
+-
+  host: roble.unizar.es
+  port: 210
+  db_name: INNOPAC
+  organization: U Zaragoza
+-
+  host: www.helmet.fi
+  port: 210
+  db_name: INNOPAC
+  organization: Helsinki Lib
+-
+  host: carmin.sudoc.abes.fr
+  port: 210
+  db_name: ABES-Z39-PUBLIC
+  organization: France
+-
+  host: gofor.bibli.ens-cachan.fr
+  port: 21210
+  db_name: ADVANCE
+  organization: French school
+-
+  host: gofor.bibli.ens-cachan.fr
+  port: 21210
+  db_name: MAIN*BIBMAST
+  organization: French school
+-
+  host: isis.cilea.it
+  port: 2100
+  db_name: usmarc
+  organization: U Brescia
+-
+  host: aleph.library.tudelft.nl
+  port: 9909
+  db_name: tud01
+  organization: Techn U Delft
+-
+  host: z3950.bibsys.no
+  port: 2100
+  db_name: BIBSYS
+  organization: Nat Lib Norway
+-
+  host: z3950.nb.no
+  port: 2100
+  db_name: norbok
+  organization: Nat Lib Norway
+-
+  host: alpha.bn.org.pl
+  port: 210
+  db_name: INNOPAC
+  organization: Nat Lib Poland
+-
+  host: z3950.btj.se
+  port: 210
+  db_name: BURK
+  organization: Sweden
+-
+  host: lbsihol.unimaas.nl
+  port: 7190
+  db_name: lbs
+  organization: U Maastricht
+-
+  host: catalogue.nla.gov.au
+  port: 7090
+  db_name: voyager
+  organization: Nat Lib Australia
+-
+  host: nlnzcat.natlib.govt.nz
+  port: 7190
+  db_name: voyager
+  organization: Nat Lib New Zealand
+-
+  host: library.cuhk.edu.hk
+  port: 210
+  db_name: INNOPAC
+  organization: Chinesse U HK
+-
+  host: linc.nus.edu.sg
+  port: 210
+  db_name: INNOPAC
+  organization: Nat U Singapore
+-
+  host: nbinet.ncl.edu.tw
+  port: 210
+  db_name: INNOPAC
+  organization: Nat Cent Lib Taiwan
+-
+  host: wine.wul.waseda.ac.jp
+  port: 210
+  db_name: INNOPAC
+  organization: Waseda U
+-
+  host: explore.up.ac.za
+  port: 210
+  db_name: INNOPAC
+  organization: U Pretoria
+-
+  host: natlib1.unisa.ac.za
+  port: 210
+  db_name: INNOPAC
+  organization: Nat Lib South Africa

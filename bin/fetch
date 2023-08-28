@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 # script receives UPC/EAN/ISBN numbers on stdin
 # and tries to fetch a MARC record for each.
 #
