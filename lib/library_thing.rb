@@ -40,6 +40,10 @@ module LibraryThing
     private
 
     def source_url(path)
+      if path[0] == '/'
+        path = path[1..]
+      end
+
       "#{@host}/#{path}"
     end
 
@@ -79,7 +83,12 @@ module LibraryThing
       end
       work_path = response.header['Location']
 
-      write_cache(cache_key, work_path)
+      if work_path.start_with?('/verify.php')
+        raise "redirected to /verify.php"
+      else
+        write_cache(cache_key, work_path)
+      end
+
       work_path
     end
 

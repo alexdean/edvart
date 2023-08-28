@@ -38,7 +38,7 @@ class Book
   end
 
   def valid?
-    !isbn.nil? && !lcc.nil?
+    !isbn.nil? && (!lcc.nil? && lcc != '')
   end
 
   def persist
