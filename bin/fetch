@@ -30,7 +30,7 @@ def search_and_store(input, log)
 
     if Book.exist?(input)
       log.info "isbn #{input} already present in local db."
-      # return
+      return
     end
 
     clients = [
