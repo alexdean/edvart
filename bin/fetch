@@ -35,8 +35,8 @@ def search_and_store(input, log)
 
     clients = [
       LocSru::Client.new(logger: log),
-      LibraryThing::Client.new(logger: log),
-      OpenLibrary::Client.new(logger: log)
+      OpenLibrary::Client.new(logger: log),
+      LibraryThing::Client.new(logger: log)
     ]
 
     book = Book.new
