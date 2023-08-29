@@ -64,7 +64,7 @@ module LocSru
       writer.write(marc)
       writer.close
 
-      book.title = marc['245']['a']
+      book.title = "#{marc['245']['a']}#{marc['245']['p']}"
       book.source_url = response.request.url
       book.local_resource = marc_filename
 
