@@ -15,6 +15,12 @@ module OpenLibrary
       isbn_path = "isbn/#{isbn}.json"
       isbn_data = fetch(isbn_path)
 
+      if isbn_data
+        # TEST: no source in db if isbn data not found
+        source = source_url(isbn_path)
+        local_resource = cache_key(isbn_path)
+      end
+
       lcc = isbn_data['lc_classifications']&.join(' ')
 
       if !lcc || lcc == ''
@@ -29,8 +35,8 @@ module OpenLibrary
         title: isbn_data['title'],
         author: author_data['name'],
         lcc: lcc,
-        source_url: source_url(isbn_path),
-        local_resource: cache_key(isbn_path)
+        source_url: source,
+        local_resource: local_resource
       )
     end
 
