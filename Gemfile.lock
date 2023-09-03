@@ -26,12 +26,18 @@ GEM
       mime-types (>= 1.16, < 4.0)
       netrc (~> 0.8)
     rexml (3.2.6)
+    rubyzip (2.3.2)
     scrub_rb (1.0.1)
+    selenium-webdriver (4.9.0)
+      rexml (~> 3.2, >= 3.2.5)
+      rubyzip (>= 1.2.2, < 3.0)
+      websocket (~> 1.0)
     sqlite3 (1.6.3)
       mini_portile2 (~> 2.8.0)
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.8.2)
+    websocket (1.2.9)
 
 PLATFORMS
   ruby
@@ -41,6 +47,7 @@ DEPENDENCIES
   marc
   nokogiri
   rest-client
+  selenium-webdriver
   sqlite3
 
 BUNDLED WITH

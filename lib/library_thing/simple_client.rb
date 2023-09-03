@@ -1,10 +1,10 @@
 require 'net/http'
 require 'nokogiri'
 require 'fileutils'
-require_relative 'book'
+require_relative '../book'
 
 module LibraryThing
-  class Client
+  class SimpleClient
     attr_reader :log
 
     def initialize(logger: nil)

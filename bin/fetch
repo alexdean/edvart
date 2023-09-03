@@ -11,7 +11,7 @@ require 'thread'
 require 'logger'
 require 'time'
 require 'colorize'
-require_relative '../lib/library_thing'
+require_relative '../lib/library_thing/simple_client'
 require_relative '../lib/loc_sru'
 require_relative '../lib/open_library'
 require_relative '../lib/book'
@@ -36,7 +36,7 @@ def search_and_store(input, log)
     clients = [
       LocSru::Client.new(logger: log),
       OpenLibrary::Client.new(logger: log),
-      LibraryThing::Client.new(logger: log)
+      LibraryThing::SimpleClient.new(logger: log)
     ]
 
     book = Book.new
