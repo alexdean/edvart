@@ -73,7 +73,7 @@ class Book
         isbn,
         title,
         author,
-        lcc,
+        lcc.to_s.strip,
         source_url,
         local_resource,
         Time.now.utc.iso8601
