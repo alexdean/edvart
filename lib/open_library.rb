@@ -23,12 +23,22 @@ module OpenLibrary
 
       lcc = deduplicate_lc_classifications(isbn_data['lc_classifications'])
             .reject { |i| i.to_s == '' }
-            .join(' ')
+            .first
 
       if !lcc || lcc == ''
         work_data = fetch("#{isbn_data.dig('works', 0, 'key')}.json")
         lcc = work_data.dig('lc_classifications', 0)
       end
+
+      # TODO: 24/50 cached isbn/book records have an ocaid value.
+      # maybe worth fetching since it looks like these are a way to access a MARC record.
+      # TODO: expand 'source_url' and 'local_resource' to their own tables so we can store multiple references.
+      # TODO: worth introducing ActiveRecord here?
+      archive_org_id = isbn_data.dig('ocaid')
+      archive_org_html_url = "https://archive.org/details/#{archive_org_id}"
+      archive_org_marcxml_url = "https://archive.org/download/#{archive_org_id}/#{archive_org_id}_archive_marc.xml"
+      # fetch these & store our own 590 metadata like loc_sru does.
+      # maybe add a Book.from_marc method. would need some extra metadata like ISBN, source url, etc.
 
       author_data = fetch("#{isbn_data.dig('authors', 0, 'key')}.json")
 

@@ -22,13 +22,12 @@ trap('SIGINT') do
 end
 
 log = Logger.new($stdout).tap { |l| l.level = Logger::INFO }
-Book.db = 'out/books.sqlite'
 
 def search_and_store(input, log)
   begin
     log.info "#{input} : start."
 
-    if Book.exist?(input)
+    if Book.exists?(input)
       log.info "isbn #{input} already present in local db."
       return
     end
@@ -43,14 +42,14 @@ def search_and_store(input, log)
     clients.each do |client|
       log.info "isbn #{input} trying #{client.class.name}."
       book = client.search(input)
-      if book.valid?
+      if book.lcc.present?
         break
       end
     end
 
-    book.persist
+    book.save!
 
-    if book.valid?
+    if book.lcc.present?
       log.info "\a#{input} : finished. '#{book.title}' #{book.local_resource}".colorize(:light_green)
     else
       log.warn "\a#{input} : not found.".colorize(:light_red)

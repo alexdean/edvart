@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require_relative '../lib/book'
-Book.db = 'out/books.sqlite'
 
 puts <<~EOF
 <html>
@@ -43,7 +42,7 @@ puts <<~EOF
 <div class='container'>
 EOF
 
-Book.all.each do |book|
+Book.where.not(lcc: nil).order(:lcc).each do |book|
   next if !book.lcc
 
   puts <<~EOF
