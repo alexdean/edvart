@@ -21,7 +21,9 @@ module OpenLibrary
         local_resource = cache_key(isbn_path)
       end
 
-      lcc = isbn_data['lc_classifications']&.join(' ')
+      lcc = deduplicate_lc_classifications(isbn_data['lc_classifications'])
+            .reject { |i| i.to_s == '' }
+            .join(' ')
 
       if !lcc || lcc == ''
         work_data = fetch("#{isbn_data.dig('works', 0, 'key')}.json")
@@ -80,6 +82,22 @@ module OpenLibrary
       rescue JSON::ParserError => e
         {}
       end
+    end
+
+    def deduplicate_lc_classifications(values)
+      # TEST: de-duplicate entries that only vary by whitespace
+      #   "lc_classifications": [
+      #     "HT123 .C387 2009",
+      #     "",
+      #     "HT123.C387 2009"
+      #   ],
+
+      # calc hash for each item
+      # group values by their hash
+      # return a single value from each hash group
+
+      groups = values.group_by { |v| v.to_s.gsub(/ +/, '').downcase }
+      groups.map { |key, items| items[0] }
     end
   end
 end
