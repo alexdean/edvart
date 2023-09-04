@@ -28,6 +28,27 @@ class Book
     result.size > 0
   end
 
+  def self.all
+    out = []
+    sql = <<~EOF
+      SELECT
+        isbn,
+        title,
+        author,
+        lcc,
+        source_url,
+        local_resource
+      FROM books
+      ORDER BY lcc
+    EOF
+
+    query(sql).map do |row|
+      field_names = row.fields.map(&:to_sym)
+      h = field_names.zip(row).to_h
+      Book.new(**h)
+    end
+  end
+
   def initialize(isbn: nil, title: nil, author: nil, lcc: nil, source_url: nil, local_resource: nil)
     @isbn = isbn
     @title = title
