@@ -3,7 +3,6 @@ require 'nokogiri'
 require 'rest-client'
 require 'marc'
 require 'time'
-require_relative 'book'
 
 module LocSru
   # search client for Library of Congress catalogue using SRU protocol

@@ -12,10 +12,6 @@ require 'logger'
 require 'time'
 require 'colorize'
 require_relative '../config/init'
-require_relative '../lib/library_thing/simple_client'
-require_relative '../lib/loc_sru'
-require_relative '../lib/open_library'
-require_relative '../lib/book'
 
 trap('SIGINT') do
   puts 'exiting.'

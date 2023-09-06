@@ -8,7 +8,11 @@ gem 'nokogiri'
 gem 'colorize'
 gem 'selenium-webdriver'
 gem 'activerecord'
-gem 'minitest'
-gem 'minitest-focus'
 gem 'pry'
-gem 'database_cleaner'
+gem 'zeitwerk'
+
+group :test do
+  gem 'minitest'
+  gem 'minitest-focus'
+  gem 'database_cleaner'
+end

@@ -1,19 +1,13 @@
-$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+this_dir = File.expand_path('../', __FILE__)
+load "#{this_dir}/../config/zeitwerk.rb"
 
-require 'active_record'
 require 'minitest/autorun'
 require 'minitest/focus'
-require 'pry'
 require 'database_cleaner'
-# require 'database_cleaner/active_record'
+require 'pry'
 
 # require 'webmock/minitest'
 # WebMock.disable_net_connect!
-
-require_relative '../lib/application_record'
-require_relative '../lib/book'
-require_relative '../lib/source_url'
-require_relative '../lib/local_resource'
 
 DatabaseCleaner.strategy = :transaction
 

@@ -1,7 +1,6 @@
 require 'rest-client'
 require 'json'
 require 'fileutils'
-require_relative 'book'
 
 module OpenLibrary
   class Client
