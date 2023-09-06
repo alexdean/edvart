@@ -4,7 +4,6 @@ require 'rest-client'
 require 'marc'
 require 'time'
 require_relative 'book'
-require 'pry'
 
 module LocSru
   # search client for Library of Congress catalogue using SRU protocol
@@ -37,10 +36,8 @@ module LocSru
       document = Nokogiri::XML(response.body)
       document.remove_namespaces!
 
-      book = Book.new(isbn: isbn)
-
       if document.xpath('//numberOfRecords').text.to_i == 0
-        return book
+        return Book.new(isbn: isbn)
       end
 
       record = document.xpath('//record').first
@@ -64,25 +61,30 @@ module LocSru
       writer.write(marc)
       writer.close
 
-      book.title = "#{marc['245']['a']}#{marc['245']['p']}"
-      book.source_url = response.request.url
-      book.local_resource = marc_filename
-
+      author = nil
       author_field = marc['100'] || marc['700']
       if author_field
-        book.author = author_field.subfields.map(&:value).join
+        author = author_field.subfields.map(&:value).join
       end
 
+      lcc = nil
       lcc_field = marc['050']
       if lcc_field
-        book.lcc = lcc_field.subfields.map(&:value).join
+        lcc = lcc_field.subfields.map(&:value).join
       else
         if marc['099']
-          book.lcc = marc['099']['a']
+          lcc = marc['099']['a']
         end
       end
 
-      book
+      Book.from_api_data(
+        isbn: isbn,
+        title: "#{marc['245']['a']}#{marc['245']['p']}",
+        author: author,
+        lcc: lcc,
+        source_url: response.request.url,
+        local_resource: marc_filename
+      )
     end
 
     private

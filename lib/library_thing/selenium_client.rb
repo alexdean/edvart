@@ -32,7 +32,7 @@ module LibraryThing
 
       # driver.page_source has full HTML
 
-      Book.new(
+      Book.from_api_data(
         isbn: isbn,
         title: title,
         author: author,

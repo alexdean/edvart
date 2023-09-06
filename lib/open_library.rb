@@ -42,7 +42,7 @@ module OpenLibrary
 
       author_data = fetch("#{isbn_data.dig('authors', 0, 'key')}.json")
 
-      Book.new(
+      Book.from_api_data(
         isbn: isbn,
         title: isbn_data['title'],
         author: author_data['name'],

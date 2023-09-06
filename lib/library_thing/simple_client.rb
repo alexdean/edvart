@@ -27,7 +27,7 @@ module LibraryThing
       title = html.css('div.headsummary').css('h1').text
       author = html.css('div.headsummary').css('h2').text.gsub(/^by /, '')
 
-      Book.new(
+      Book.from_api_data(
         isbn: isbn,
         title: title,
         author: author,

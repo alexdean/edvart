@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require_relative '../lib/book'
+require_relative '../config/init'
 
 puts <<~EOF
 <html>

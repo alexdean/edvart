@@ -11,6 +11,7 @@ require 'thread'
 require 'logger'
 require 'time'
 require 'colorize'
+require_relative '../config/init'
 require_relative '../lib/library_thing/simple_client'
 require_relative '../lib/loc_sru'
 require_relative '../lib/open_library'
@@ -27,7 +28,7 @@ def search_and_store(input, log)
   begin
     log.info "#{input} : start."
 
-    if Book.exists?(input)
+    if Book.where(isbn: input).exists?(input)
       log.info "isbn #{input} already present in local db."
       return
     end
