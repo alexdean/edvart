@@ -29,26 +29,39 @@ module OpenLibrary
         lcc = work_data.dig('lc_classifications', 0)
       end
 
-      # TODO: 24/50 cached isbn/book records have an ocaid value.
-      # maybe worth fetching since it looks like these are a way to access a MARC record.
-      # TODO: expand 'source_url' and 'local_resource' to their own tables so we can store multiple references.
-      # TODO: worth introducing ActiveRecord here?
-      archive_org_id = isbn_data.dig('ocaid')
-      archive_org_html_url = "https://archive.org/details/#{archive_org_id}"
-      archive_org_marcxml_url = "https://archive.org/download/#{archive_org_id}/#{archive_org_id}_archive_marc.xml"
-      # fetch these & store our own 590 metadata like loc_sru does.
-      # maybe add a Book.from_marc method. would need some extra metadata like ISBN, source url, etc.
-
       author_data = fetch("#{isbn_data.dig('authors', 0, 'key')}.json")
 
-      Book.from_api_data(
-        isbn: isbn,
-        title: isbn_data['title'],
-        author: author_data['name'],
-        lcc: lcc,
-        source_url: source,
-        local_resource: local_resource
-      )
+      book =  Book.from_api_data(
+                isbn: isbn,
+                title: isbn_data['title'],
+                author: author_data['name'],
+                lcc: lcc,
+                source_url: source,
+                local_resource: local_resource
+              )
+
+      archive_org_id = isbn_data.dig('ocaid')
+      if archive_org_id
+        archive_org_html_url = "https://archive.org/details/#{archive_org_id}"
+        archive_org_marcxml_url = "https://archive.org/download/#{archive_org_id}/#{archive_org_id}_archive_marc.xml"
+
+        response = RestClient.get(archive_org_marcxml_url)
+
+        # TODO: Maybe author & title in MARC is better than what we got from api call above?
+        marc, marc_filename = MarcUtil.store_local(
+                                marc_xml: response.body,
+                                source_url: archive_org_marcxml_url,
+                                isbn: isbn,
+                                source: 'openlibrary'
+                              )
+        if marc_filename
+          # use HTML url since we can get from there to MARC url
+          # HTML will be more useful for browsing
+          book.add_data!(local_resource: marc_filename, source_url: archive_org_html_url)
+        end
+      end
+
+      book
     end
 
     private

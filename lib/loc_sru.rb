@@ -1,8 +1,5 @@
 require 'logger'
-require 'nokogiri'
 require 'rest-client'
-require 'marc'
-require 'time'
 
 module LocSru
   # search client for Library of Congress catalogue using SRU protocol
@@ -32,33 +29,16 @@ module LocSru
       response = RestClient.get('http://lx2.loc.gov:210/lcdb',
         params: base_query.merge(query: build_sru_query(isbn))
       )
-      document = Nokogiri::XML(response.body)
-      document.remove_namespaces!
 
-      if document.xpath('//numberOfRecords').text.to_i == 0
+      marc, marc_filename = MarcUtil.store_local(
+                              marc_xml: response.body,
+                              source_url: response.request.url,
+                              isbn: isbn,
+                              source: 'loc'
+                            )
+      if !marc
         return Book.new(isbn: isbn)
       end
-
-      record = document.xpath('//record').first
-      reader = MARC::XMLReader.new(StringIO.new(record.to_s))
-
-      marc = reader.map{ |r| r }[0]
-
-      # 59x fields are reserved for local use.
-      # we'll use 590 to track how we retrieved this record
-      # http://www.loc.gov/marc/bibliographic/bd59x.html
-      marc << MARC::DataField.new('590', '0', '0',
-        # the UPC/EAN/ISBN that we actually scanned, so it can be used for searches
-        ['a', isbn],
-        # and the URL that we retrieved it from
-        ['b', response.request.url],
-        ['c', Time.now.utc.iso8601]
-      )
-
-      marc_filename = "out/marc/#{isbn.to_s.gsub(':', '-')}.marc"
-      writer = MARC::Writer.new(marc_filename)
-      writer.write(marc)
-      writer.close
 
       author = nil
       author_field = marc['100'] || marc['700']
