@@ -1,7 +1,9 @@
 #!/usr/bin/env ruby
 
 # script receives UPC/EAN/ISBN numbers on stdin
-# and tries to fetch a MARC record for each.
+# and cycles through the available label_status options
+#
+# basically: affix label, & scan to mark the book as labelled.
 #
 # script runs until interrupted.
 # primary intent is to receive input from a barcode scanner.
@@ -31,7 +33,12 @@ def mark_labelled(input, log)
       return
     end
 
-    status_list = ['no', 'yes', 'skip'].freeze
+    status_colors = {
+      'no' => :light_red,
+      'yes' => :light_green,
+      'skip' => :light_yellow
+    }
+    status_list = status_colors.keys.freeze
     current_index = status_list.index(book.label_status)
     next_index = current_index + 1
     if next_index >= status_list.size
@@ -41,7 +48,12 @@ def mark_labelled(input, log)
     result = book.update(label_status: status_list[next_index])
 
     if result
-      log.info "\a#{input} : finished. '#{book.title}' label_status:#{book.label_status}".colorize(:light_green)
+      message = "\a#{input} : '#{book.title}' #{book.lcc} label_status:#{book.label_status}"
+      status_color = status_colors[book.label_status]
+      if status_color
+        message = message.colorize(status_color)
+      end
+      log.info message
     else
       log.warn "\a#{input} : #{book.errors.full_messages.join(', ')}".colorize(:light_red)
     end

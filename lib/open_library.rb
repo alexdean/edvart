@@ -20,9 +20,12 @@ module OpenLibrary
         local_resource = cache_key(isbn_path)
       end
 
-      lcc = deduplicate_lc_classifications(isbn_data['lc_classifications'])
-            .reject { |i| i.to_s == '' }
-            .first
+      lcc = nil
+      if isbn_data['lc_classifications']
+        lcc = deduplicate_lc_classifications(isbn_data['lc_classifications'])
+              .reject { |i| i.to_s == '' }
+              .first
+      end
 
       if !lcc || lcc == ''
         work_data = fetch("#{isbn_data.dig('works', 0, 'key')}.json")

@@ -16,8 +16,8 @@ puts <<~EOF
     .book {
       border: dashed #aaa 1px;
 
-      width: 3in;
-      height: 2in;
+      width: 2.75in;
+      height: 1in;
       position: relative;
     }
     .lcc {

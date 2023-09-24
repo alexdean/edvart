@@ -8,8 +8,16 @@ will be saved as local [MARC](http://www.loc.gov/marc/faq.html#definition) recor
 
 ```
 $ bundle
-$ bundle exec ruby sru_fetch.rb
+$ bin/fetch
 ```
+
+## TODO
+
+ - separate 'barcode value' from ISBN.
+ - Sort numeric parts of LCC numbers numerically.
+ - "Read" status. (Date maybe?) Track what's been read & what hasn't.
+ - Location. Will shelve books in different rooms. Will want to know where they are.
+ - Extra categories I want to add. ("Celtic", "Native American", etc.)
 
 ## What Next?
 
