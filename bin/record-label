@@ -1,0 +1,70 @@
+#!/usr/bin/env ruby
+
+# script receives UPC/EAN/ISBN numbers on stdin
+# and tries to fetch a MARC record for each.
+#
+# script runs until interrupted.
+# primary intent is to receive input from a barcode scanner.
+
+require 'io/console'
+require 'thread'
+require 'logger'
+require 'time'
+require 'colorize'
+require_relative '../config/init'
+
+trap('SIGINT') do
+  puts 'exiting.'
+  exit
+end
+
+log = Logger.new($stdout).tap { |l| l.level = Logger::INFO }
+
+def mark_labelled(input, log)
+  begin
+    log.info "#{input} : start."
+
+    book = Book.find_by(isbn: input)
+
+    if !book
+      log.warn "\a#{input} : not found.".colorize(:light_red)
+      return
+    end
+
+    status_list = ['no', 'yes', 'skip'].freeze
+    current_index = status_list.index(book.label_status)
+    next_index = current_index + 1
+    if next_index >= status_list.size
+      next_index = 0
+    end
+
+    result = book.update(label_status: status_list[next_index])
+
+    if result
+      log.info "\a#{input} : finished. '#{book.title}' label_status:#{book.label_status}".colorize(:light_green)
+    else
+      log.warn "\a#{input} : #{book.errors.full_messages.join(', ')}".colorize(:light_red)
+    end
+  rescue => e
+    log.error "\a#{input} : #{e.class} #{e.message} #{e.backtrace.join("\n")}".colorize(:light_red)
+  end
+end
+
+log.info "Started. Enter ISBN numbers now."
+log.info "Hit Enter to toggle input echoing."
+
+no_echo = true
+loop do
+  if no_echo
+    input = STDIN.noecho{ gets }.strip
+  else
+    input = gets.strip
+  end
+
+  if input == ""
+    no_echo = !no_echo
+    log.info "echo #{no_echo ? 'off' : 'on'}"
+  else
+    Thread.new { mark_labelled(input, log) }
+  end
+end

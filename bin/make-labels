@@ -42,7 +42,7 @@ puts <<~EOF
 <div class='container'>
 EOF
 
-Book.where.not(lcc: nil).order(:lcc).each do |book|
+Book.where(label_status: 'no').where.not(lcc: nil).order(:lcc).each do |book|
   next if !book.lcc
 
   puts <<~EOF

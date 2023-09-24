@@ -31,17 +31,18 @@ ActiveRecord::Base.connection.execute "DROP TABLE IF EXISTS local_resources"
 ActiveRecord::Base.connection.execute "DROP TABLE IF EXISTS books"
 
 ActiveRecord::Base.connection.execute <<~EOF
-  CREATE TABLE "books" (
-    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-    "isbn" text NOT NULL,
-    "title" text,
-    "author" text,
-    "lcc" text,
-    "source_url" text,
-    "created_at" datetime NOT NULL,
-    "updated_at" datetime,
-    "local_resource" TEXT
-  )
+CREATE TABLE "books" (
+  "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "isbn" text NOT NULL,
+  "title" text,
+  "author" text,
+  "lcc" text,
+  "source_url" text,
+  "created_at" datetime NOT NULL,
+  "updated_at" datetime,
+  "local_resource" TEXT,
+  "label_status" TEXT NOT NULL DEFAULT 'no'
+)
 EOF
 
 ActiveRecord::Base.connection.execute <<~EOF
