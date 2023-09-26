@@ -48,19 +48,22 @@ module OpenLibrary
         archive_org_html_url = "https://archive.org/details/#{archive_org_id}"
         archive_org_marcxml_url = "https://archive.org/download/#{archive_org_id}/#{archive_org_id}_archive_marc.xml"
 
-        response = RestClient.get(archive_org_marcxml_url)
-
-        # TODO: Maybe author & title in MARC is better than what we got from api call above?
-        marc, marc_filename = MarcUtil.store_local(
-                                marc_xml: response.body,
-                                source_url: archive_org_marcxml_url,
-                                isbn: isbn,
-                                source: 'openlibrary'
-                              )
-        if marc_filename
-          # use HTML url since we can get from there to MARC url
-          # HTML will be more useful for browsing
-          book.add_data!(local_resource: marc_filename, source_url: archive_org_html_url)
+        begin
+          response = RestClient.get(archive_org_marcxml_url)
+          # TODO: Maybe author & title in MARC is better than what we got from api call above?
+          marc, marc_filename = MarcUtil.store_local(
+                                  marc_xml: response.body,
+                                  source_url: archive_org_marcxml_url,
+                                  isbn: isbn,
+                                  source: 'openlibrary'
+                                )
+          if marc_filename
+            # use HTML url since we can get from there to MARC url
+            # HTML will be more useful for browsing
+            book.add_data!(local_resource: marc_filename, source_url: archive_org_html_url)
+          end
+        rescue RestClient::NotFound => e
+          @log.info "supplemental MARC not found on archive.org. #{archive_org_marcxml_url}"
         end
       end
 

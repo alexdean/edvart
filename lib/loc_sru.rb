@@ -37,7 +37,8 @@ module LocSru
                               source: 'loc'
                             )
       if !marc
-        return Book.new(isbn: isbn)
+        # TODO: test. if marc not found, but isbn already in db, we return existing record.
+        return Book.from_api_data(isbn: isbn)
       end
 
       author = nil

@@ -26,7 +26,7 @@ def mark_labelled(input, log)
   begin
     log.info "#{input} : start."
 
-    book = Book.find_by(isbn: input)
+    book = Book.find_by(barcode: input)
 
     if !book
       log.warn "\a#{input} : not found.".colorize(:light_red)

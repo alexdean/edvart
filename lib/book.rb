@@ -4,6 +4,10 @@ class Book < ApplicationRecord
 
   validates :isbn, presence: true, uniqueness: true
 
+  before_validation do
+    self.barcode ||= self.isbn
+  end
+
   # initialize a Book and add data to it.
   # designed to only add data, so a `nil` value will not replace a non-nil value.
   #
