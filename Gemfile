@@ -10,6 +10,7 @@ gem 'selenium-webdriver'
 gem 'activerecord'
 gem 'pry'
 gem 'zeitwerk'
+gem 'terminal-table'
 
 group :test do
   gem 'minitest'

@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+require 'terminal-table'
+require_relative '../config/init'
+
+books = []
+
+Book.all.sort { |a,b| Book.lcc_sort(a, b) }.each do |book|
+  books << [book.lcc, book.title, book.author]
+end
+
+table = Terminal::Table.new(
+          headings: ['LCC', 'Title', 'Author'],
+          rows: books
+        )
+
+puts table

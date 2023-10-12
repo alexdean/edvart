@@ -81,6 +81,16 @@ describe Book do
     end
   end
 
+  describe '.lcc_sort' do
+    it 'sorts shorter values first'
+    # 'TP570 .J34 1996'
+    # 'TP570'
+    #
+    # PS3554.E449.D4222
+    # PS
+    # PS3554.O415E5 2005
+  end
+
   describe '#lcc_parts' do
     it 'splits lcc into alphabetical and numeric groups' do
       outputs = []
@@ -108,14 +118,19 @@ describe Book do
       subject.lcc = "GV1469.D84 G938."
       outputs << subject.lcc_parts
 
+      # consecutive numeric parts
+      subject.lcc = "Q124.97.F35 2020"
+      outputs << subject.lcc_parts
+
       # puts outputs.inspect
 
-      assert_equal(["BH", 301, "M", 54, "M", 44, 1987], outputs[0])
-      assert_equal(["GV", 1469, "D", 84, "G", 938], outputs[1])
-      assert_equal(["GV", 1469, "D", 84, "G", 938], outputs[2])
-      assert_equal(["GV", 1469, "D", 84, "G", 938], outputs[3])
-      assert_equal(["GV", 1469, "D", 84, "G", 938, "P"], outputs[4])
-      assert_equal(["GV", 1469, "D", 84, "G", 938], outputs[5])
+      assert_equal(["BH",  301, "M", 54,  "M",   44, 1987], outputs[0])
+      assert_equal(["GV", 1469, "D", 84,  "G",  938      ], outputs[1])
+      assert_equal(["GV", 1469, "D", 84,  "G",  938      ], outputs[2])
+      assert_equal(["GV", 1469, "D", 84,  "G",  938      ], outputs[3])
+      assert_equal(["GV", 1469, "D", 84,  "G",  938,  "P"], outputs[4])
+      assert_equal(["GV", 1469, "D", 84,  "G",  938      ], outputs[5])
+      assert_equal(["Q",   124, 97,  "F", 35,  2020      ], outputs[6])
     end
 
     it 'raises on multibyte characters' do

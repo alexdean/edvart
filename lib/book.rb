@@ -18,6 +18,38 @@ class Book < ApplicationRecord
     book
   end
 
+  def self.lcc_sort(book_a, book_b)
+    book_a_lcc_parts = book_a.lcc_parts
+    book_b_lcc_parts = book_b.lcc_parts
+
+    book_a_lcc_parts.each_with_index do |a_part, idx|
+      b_part = book_b_lcc_parts[idx]
+
+      if a_part.class != b_part.class
+        a_part = a_part.to_s
+        b_part = b_part.to_s
+      end
+
+      # https://ruby-doc.org/3.2.2/Enumerable.html#method-i-sort
+      # A negative integer if a < b.
+      # Zero if a == b.
+      # A positive integer if a > b.
+      if a_part == b_part
+        next
+      else
+        return a_part < b_part ? -1 : 1
+      end
+    end
+
+    book_a_title = book_a.title.to_s.strip.downcase
+    book_b_title = book_b.title.to_s.strip.downcase
+    if book_a_title == book_b_title
+      0
+    else
+      book_a_title < book_b_title ? -1 : 1
+    end
+  end
+
   def add_data!(title: nil, author: nil, lcc: nil, source_url: nil, local_resource: nil)
     if title
       self.title = title
