@@ -41,7 +41,9 @@ CREATE TABLE "books" (
   "created_at" datetime NOT NULL,
   "updated_at" datetime,
   "local_resource" TEXT,
-  "label_status" TEXT NOT NULL DEFAULT 'no'
+  "label_status" TEXT NOT NULL DEFAULT 'no',
+  "note" TEXT,
+  "barcode" TEXT
 )
 EOF
 

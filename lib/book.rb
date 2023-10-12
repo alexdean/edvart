@@ -85,7 +85,6 @@ class Book < ApplicationRecord
 
   private
 
-
   def finalize_group(group, group_type, to:)
     output = to
 
