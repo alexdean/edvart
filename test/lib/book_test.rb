@@ -80,4 +80,50 @@ describe Book do
       end
     end
   end
+
+  describe '#lcc_parts' do
+    it 'splits lcc into alphabetical and numeric groups' do
+      outputs = []
+      subject = Book.new
+
+      subject.lcc = "BH301.M54M44 1987"
+      outputs << subject.lcc_parts
+
+      subject.lcc = "GV1469.D84 G938"
+      outputs << subject.lcc_parts
+
+      # sequential 'other' characters
+      subject.lcc = "GV1469.D84  G938"
+      outputs << subject.lcc_parts
+
+      # starts with non-alphanum
+      subject.lcc = " GV1469.D84 G938"
+      outputs << subject.lcc_parts
+
+      # new group on last character
+      subject.lcc = "GV1469.D84 G938P"
+      outputs << subject.lcc_parts
+
+      # ends with non-alphanum
+      subject.lcc = "GV1469.D84 G938."
+      outputs << subject.lcc_parts
+
+      # puts outputs.inspect
+
+      assert_equal(["BH", 301, "M", 54, "M", 44, 1987], outputs[0])
+      assert_equal(["GV", 1469, "D", 84, "G", 938], outputs[1])
+      assert_equal(["GV", 1469, "D", 84, "G", 938], outputs[2])
+      assert_equal(["GV", 1469, "D", 84, "G", 938], outputs[3])
+      assert_equal(["GV", 1469, "D", 84, "G", 938, "P"], outputs[4])
+      assert_equal(["GV", 1469, "D", 84, "G", 938], outputs[5])
+    end
+
+    it 'raises on multibyte characters' do
+      subject = Book.new
+      subject.lcc = "ABC💀DEF"
+
+      e = assert_raises { subject.lcc_parts }
+      assert_equal "LCC 'ABC💀DEF' contains multibyte character '💀'.", e.message
+    end
+  end
 end
