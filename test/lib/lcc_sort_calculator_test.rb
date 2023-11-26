@@ -1,32 +1,6 @@
 require 'test_helper'
 
 describe LccSortCalculator do
-  # describe '.lcc_sort' do
-  #   it 'sorts shorter values first' do
-  #     books = [
-  #       book_a = Book.new(lcc: '1'),
-  #       book_b = Book.new(lcc: 'PS'),
-  #       book_c = Book.new(lcc: 'PS3554.E449.D4222'),
-  #       book_d = Book.new(lcc: 'PS3554.O415E5 2005'),
-  #       book_e = Book.new(lcc: 'TP570'),
-  #       book_f = Book.new(lcc: 'TP570.1'),
-  #       book_g = Book.new(lcc: 'TP570.J34 1996'),
-  #     ]
-
-  #     sorted = LccSortCalculator.lcc_sort(books)
-
-  #     assert_equal(sorted[0], book_a)
-  #     assert_equal(sorted[1], book_b)
-  #     assert_equal(sorted[2], book_c)
-  #     assert_equal(sorted[3], book_d)
-  #     assert_equal(sorted[4], book_e)
-  #     assert_equal(sorted[5], book_f)
-  #     assert_equal(sorted[6], book_g)
-  #   end
-
-  #   it 'sorts by title when lcc values are identical'
-  # end
-
   it 'does the full process' do
     lccs = <<~EOF
       UG630.G927 1983
@@ -183,4 +157,30 @@ describe LccSortCalculator do
       assert_equal(expected, padded_ints)
     end
   end
+
+  # describe '.lcc_sort' do
+  #   it 'sorts shorter values first' do
+  #     books = [
+  #       book_a = Book.new(lcc: '1'),
+  #       book_b = Book.new(lcc: 'PS'),
+  #       book_c = Book.new(lcc: 'PS3554.E449.D4222'),
+  #       book_d = Book.new(lcc: 'PS3554.O415E5 2005'),
+  #       book_e = Book.new(lcc: 'TP570'),
+  #       book_f = Book.new(lcc: 'TP570.1'),
+  #       book_g = Book.new(lcc: 'TP570.J34 1996'),
+  #     ]
+
+  #     sorted = LccSortCalculator.lcc_sort(books)
+
+  #     assert_equal(sorted[0], book_a)
+  #     assert_equal(sorted[1], book_b)
+  #     assert_equal(sorted[2], book_c)
+  #     assert_equal(sorted[3], book_d)
+  #     assert_equal(sorted[4], book_e)
+  #     assert_equal(sorted[5], book_f)
+  #     assert_equal(sorted[6], book_g)
+  #   end
+
+  #   it 'sorts by title when lcc values are identical'
+  # end
 end
