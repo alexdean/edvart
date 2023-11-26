@@ -2,9 +2,10 @@ class Book < ApplicationRecord
   has_many :source_urls
   has_many :local_resources
 
-  validates :isbn, presence: true, uniqueness: true
+  validates :isbn, uniqueness: true
 
   before_validation do
+    # most barcodes are ISBNs
     self.barcode ||= self.isbn
   end
 
@@ -16,38 +17,6 @@ class Book < ApplicationRecord
     book = Book.find_or_initialize_by(isbn: isbn)
     book.add_data!(title: title, author: author, lcc: lcc, source_url: source_url, local_resource: local_resource)
     book
-  end
-
-  def self.lcc_sort(book_a, book_b)
-    book_a_lcc_parts = book_a.lcc_parts
-    book_b_lcc_parts = book_b.lcc_parts
-
-    book_a_lcc_parts.each_with_index do |a_part, idx|
-      b_part = book_b_lcc_parts[idx]
-
-      if a_part.class != b_part.class
-        a_part = a_part.to_s
-        b_part = b_part.to_s
-      end
-
-      # https://ruby-doc.org/3.2.2/Enumerable.html#method-i-sort
-      # A negative integer if a < b.
-      # Zero if a == b.
-      # A positive integer if a > b.
-      if a_part == b_part
-        next
-      else
-        return a_part < b_part ? -1 : 1
-      end
-    end
-
-    book_a_title = book_a.title.to_s.strip.downcase
-    book_b_title = book_b.title.to_s.strip.downcase
-    if book_a_title == book_b_title
-      0
-    else
-      book_a_title < book_b_title ? -1 : 1
-    end
   end
 
   def add_data!(title: nil, author: nil, lcc: nil, source_url: nil, local_resource: nil)
@@ -67,63 +36,6 @@ class Book < ApplicationRecord
 
     if local_resource && !self.local_resources.where(path: local_resource).exists?
       self.local_resources.build(path: local_resource)
-    end
-  end
-
-  def lcc_parts
-    output = []
-
-    # ascii ranges
-    letters = 65..90
-    numbers = 48..57
-
-    current_group_type = nil
-    current_group = ''
-    lcc.to_s.chars.each_with_index do |c|
-      if c.bytes.size > 1
-        raise "LCC '#{lcc}' contains multibyte character '#{c}'."
-      end
-
-      normalized = c.upcase
-      type = if letters.include?(normalized.bytes[0])
-               :letter
-             elsif numbers.include?(normalized.bytes[0])
-               :number
-             else
-               :other
-             end
-
-      # init on first iteration only
-      if current_group_type.nil?
-        current_group_type = type
-      end
-
-      # this says "if the current character does not go with the current group"
-      if current_group_type != type
-        finalize_group(current_group, current_group_type, to: output)
-
-        current_group_type = type
-        current_group = ''
-      end
-
-      current_group += normalized
-    end
-
-    # whatever's left in current_group should be flushed to output.
-    finalize_group(current_group, current_group_type, to: output)
-
-    output
-  end
-
-  private
-
-  def finalize_group(group, group_type, to:)
-    output = to
-
-    if group_type == :number
-      output << group.to_i
-    elsif group_type == :letter
-      output << group
     end
   end
 end
