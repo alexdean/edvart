@@ -94,7 +94,12 @@ class LccSortCalculator
       padding_mask.map { |padding|
         idx += 1
         part = parts[idx]
-        part.to_s.rjust(padding, '0')
+
+        if part.is_a?(String)
+          part.ljust(padding, '0')
+        else
+          part.to_s.rjust(padding, '0')
+        end
       }
     end
   end

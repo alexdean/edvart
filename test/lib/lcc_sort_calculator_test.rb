@@ -27,14 +27,14 @@ describe LccSortCalculator do
     all_padded_parts = LccSortCalculator.pad_all_parts(all_unpadded_parts, padding_mask)
     expected = [
       ['UG', '630', 'G', '927', '1983'],
-      ['0B', '358', 'G', '078', '1975']
+      ['B0', '358', 'G', '078', '1975']
     ]
     assert_equal(expected, all_padded_parts)
 
     all_unpadded_ints = LccSortCalculator.integerize_parts(all_padded_parts)
     expected = [
       144279630315185578995,
-        1459338840511113425
+       52133694819783960785
     ]
     assert_equal(expected, all_unpadded_ints)
 
@@ -42,7 +42,7 @@ describe LccSortCalculator do
     all_padded_ints = LccSortCalculator.pad_ints(all_unpadded_ints, max_length)
     expected = [
       '144279630315185578995',
-      '001459338840511113425'
+      '052133694819783960785'
     ]
     assert_equal(expected, all_padded_ints)
   end
@@ -108,14 +108,14 @@ describe LccSortCalculator do
     it 'pads each part to the length described in padding_mask' do
       mask = [3, 2, 3]
       parts = [
-        ['A', 'A', 'A'],
+        ['A', 11, 2],
         ['B', 'B']
       ]
 
       actual = LccSortCalculator.pad_all_parts(parts, mask)
       expected = [
-        ['00A', '0A', '00A'],
-        ['00B', '0B', '000']
+        ['A00', '11', '002'],
+        ['B00', 'B0', '000']
       ]
       assert_equal(expected, actual)
     end
@@ -124,14 +124,14 @@ describe LccSortCalculator do
   describe '.integerize_parts' do
     it 'creates an integer from each item' do
       all_padded_parts = [
-        ['00A', '0A', '00A'],
-        ['B0B', '0B', '000']
+        ['A00', '11', 'A00'],
+        ['B0B', 'B0', '000']
       ]
 
       all_unpadded_ints = LccSortCalculator.integerize_parts(all_padded_parts)
       expected = [
-        '00A0A00A'.to_i(36),
-        'B0B0B000'.to_i(36)
+        'A0011A00'.to_i(36),
+        'B0BB0000'.to_i(36)
       ]
       assert_equal(expected, all_unpadded_ints)
     end
@@ -140,19 +140,19 @@ describe LccSortCalculator do
   describe '.pad_ints' do
     it 'ensures all numeric strings are padded to the same length' do
       unpadded_ints = [
-        '00A0A00A'.to_i(36),
-        'B0B0B000'.to_i(36)
+        'A0011A00'.to_i(36),
+        'ZZZZZZZZ'.to_i(36)
       ]
       expected = [
-        605128330,
-        862671446208
+         783643380192,
+        2821109907455
       ]
       assert_equal(expected, unpadded_ints)
 
-      padded_ints = LccSortCalculator.pad_ints(unpadded_ints, 12)
+      padded_ints = LccSortCalculator.pad_ints(unpadded_ints, 14)
       expected = [
-        '000605128330',
-        '862671446208'
+        '00783643380192',
+        '02821109907455'
       ]
       assert_equal(expected, padded_ints)
     end
