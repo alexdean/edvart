@@ -9,35 +9,46 @@ describe LccSortCalculator do
 
     books = lccs.split("\n").map { |lcc| Book.new(lcc: lcc) }
 
-    all_unpadded_parts = []
-    books.each do |book|
-      all_unpadded_parts << LccSortCalculator.lcc_parts(book.lcc)
-    end
+    all_unpadded_parts = books.map do |book|
+                           LccSortCalculator.lcc_parts(book.lcc)
+                         end
 
+    # split LCCs into their constituent parts
+    # string parts are strings, and numeric parts are integers
     expected = [
       ['UG', 630, 'G', 927, 1983],
       [ 'B', 358, 'G',  78, 1975]
     ]
     assert_equal(expected, all_unpadded_parts)
 
+    # the maximum character length at each position across all books
     padding_mask = LccSortCalculator.lcc_padding_mask(all_unpadded_parts)
     expected = [2, 3, 1, 3, 4]
     assert_equal(expected, padding_mask)
 
-    all_padded_parts = LccSortCalculator.pad_all_parts(all_unpadded_parts, padding_mask)
+    # pad each part based on the padding mask
+    # string parts are right-padded, and numeric parts are left-padded
+    all_padded_parts = all_unpadded_parts.map do |unpadded_part|
+                         LccSortCalculator.pad_parts(unpadded_part, padding_mask)
+                       end
     expected = [
       ['UG', '630', 'G', '927', '1983'],
       ['B0', '358', 'G', '078', '1975']
     ]
     assert_equal(expected, all_padded_parts)
 
-    all_unpadded_ints = LccSortCalculator.integerize_parts(all_padded_parts)
+    # all lccs are now the same length, and each position has equivalent significance.
+    # join and convert them into a single integer
+    all_unpadded_ints = all_padded_parts.map do |padded_parts|
+                          LccSortCalculator.integerize_parts(padded_parts)
+                        end
     expected = [
       144279630315185578995,
        52133694819783960785
     ]
     assert_equal(expected, all_unpadded_ints)
 
+    # integers will be stored as blobs. shorter values need to be 0-padded to the same length.
     max_length = all_unpadded_ints.map{|u| u.to_s.size }.max
     all_padded_ints = LccSortCalculator.pad_ints(all_unpadded_ints, max_length)
     expected = [
@@ -104,36 +115,34 @@ describe LccSortCalculator do
     end
   end
 
-  describe '.pad_all_parts' do
+  describe '.pad_parts' do
     it 'pads each part to the length described in padding_mask' do
       mask = [3, 2, 3]
-      parts = [
-        ['A', 11, 2],
-        ['B', 'B']
-      ]
+      actual = LccSortCalculator.pad_parts(['A', 11, 2], mask)
+      assert_equal(['A00', '11', '002'], actual)
+    end
 
-      actual = LccSortCalculator.pad_all_parts(parts, mask)
-      expected = [
-        ['A00', '11', '002'],
-        ['B00', 'B0', '000']
-      ]
-      assert_equal(expected, actual)
+    it 'returns same number of entries as in the mask, even if parts is shorter' do
+      mask = [3, 2, 3]
+      actual = LccSortCalculator.pad_parts(['B', 'B'], mask)
+      assert_equal(['B00', 'B0', '000'], actual)
     end
   end
 
   describe '.integerize_parts' do
     it 'creates an integer from each item' do
-      all_padded_parts = [
-        ['A00', '11', 'A00'],
-        ['B0B', 'B0', '000']
-      ]
+      actual = LccSortCalculator.integerize_parts(['A00', '11', 'A00'])
+      assert_equal('A0011A00'.to_i(36), actual)
 
-      all_unpadded_ints = LccSortCalculator.integerize_parts(all_padded_parts)
-      expected = [
-        'A0011A00'.to_i(36),
-        'B0BB0000'.to_i(36)
-      ]
-      assert_equal(expected, all_unpadded_ints)
+      actual = LccSortCalculator.integerize_parts(['B1B', 'B2', '543'])
+      assert_equal('B1BB2543'.to_i(36), actual)
+    end
+
+    it 'has more examples' do
+      assert_equal(0, LccSortCalculator.integerize_parts(['0']))
+      assert_equal(9, LccSortCalculator.integerize_parts(['9']))
+      assert_equal(10, LccSortCalculator.integerize_parts(['A']))
+      assert_equal(35, LccSortCalculator.integerize_parts(['Z']))
     end
   end
 

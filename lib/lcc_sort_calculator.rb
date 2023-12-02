@@ -9,10 +9,14 @@ class LccSortCalculator
     padding_mask = lcc_padding_mask(all_unpadded_parts)
 
     # apply padding to individual parts
-    all_padded_parts = pad_all_parts(all_unpadded_parts, padding_mask)
+    all_padded_parts = all_unpadded_parts.map do |unpadded_parts|
+                         pad_parts(unpadded_parts, padding_mask)
+                       end
 
     # convert padded parts to ints
-    all_unpadded_ints = integerize_parts(all_padded_parts)
+    all_unpadded_ints = all_padded_parts.map do |padded_parts|
+                          integerize_parts(padded_parts)
+                        end
 
     # the final lcc values will be stored as BLOBs
     # we need to pad shorter numeric strings to ensure all BLOBs have the same size
@@ -28,6 +32,16 @@ class LccSortCalculator
     books
   end
 
+  # split an LCC string into an array of parts
+  #
+  # string parts are strings, and numeric parts are integers
+  #
+  # @example
+  #  LccSortCalculator.lcc_parts("BH301.M54M44 1987")
+  #  # => ["BH", 301, "M", 54, "M", 44, 1987]
+  #
+  # @param lcc [String] the LCC string to split
+  # @return [Array] an array of parts
   def self.lcc_parts(lcc)
     output = []
 
@@ -73,7 +87,19 @@ class LccSortCalculator
     output
   end
 
-  # array representing largest number of characters at each portion of all LCC part arrays
+  # identify the longest sub-part of all given lcc values
+  #
+  # @example
+  #   parts = [
+  #     [999,  'A', 'G'],
+  #     [ 'B', 12]
+  #   ]
+  #
+  #   LccSortCalculator.lcc_padding_mask(parts)
+  #   # => [3, 2, 1]
+  #
+  # @param all_unpadded_parts [Array<Array>] an array of arrays of parts
+  # @return [Array<Integer>]
   def self.lcc_padding_mask(all_unpadded_parts)
     mask = []
     all_unpadded_parts.each do |parts|
@@ -88,29 +114,41 @@ class LccSortCalculator
   end
 
   # pad individual parts according to the mask
-  def self.pad_all_parts(all_unpadded_parts, padding_mask)
-    all_unpadded_parts.map do |parts|
-      idx = -1
-      padding_mask.map { |padding|
-        idx += 1
-        part = parts[idx]
+  #
+  # @example
+  #   mask = [3, 2, 3]
+  #   parts = ['A', 11, 2]
+  #
+  #   LccSortCalculator.apply_part_padding(parts, mask)
+  #   # => ['A00', '11', '002']
+  #
+  # @param unpadded_parts [Array] an array of parts
+  # @param padding_mask [Array<Integer>] an array of padding lengths
+  # @return [Array<String>] an array of padded parts
+  def self.pad_parts(unpadded_parts, padding_mask)
+    idx = -1
+    padding_mask.map do |padding_length|
+      idx += 1
+      unpadded = unpadded_parts[idx]
 
-        if part.is_a?(String)
-          part.ljust(padding, '0')
-        else
-          part.to_s.rjust(padding, '0')
-        end
-      }
+      if unpadded.is_a?(String)
+        unpadded.ljust(padding_length, '0')
+      else
+        unpadded.to_s.rjust(padding_length, '0')
+      end
     end
   end
 
   # convert padded parts into a single number
   #
   # by treating the joined parts as a base36 numeric string
-  def self.integerize_parts(all_padded_parts)
-    all_padded_parts.map do |padded_parts|
-      padded_parts.join.to_i(36)
-    end
+  # base36 is used because all LCC values A-Z0-9 are valid base36 digits.
+  #
+  # @param all_padded_parts [Array<String>] an array strings
+  # @return [Integer]
+  def self.integerize_parts(padded_parts)
+
+    padded_parts.join.to_i(36)
   end
 
   def self.pad_ints(all_unpadded_ints, length)
