@@ -1,4 +1,37 @@
 class LccSortCalculator
+  def calculate_lcc_sort(book_lcc)
+    parts = lcc_parts(book_lcc)
+    this_padding_mask = lcc_padding_mask([parts])
+
+    padding_mask = fetch_padding_mask(this_padding_mask)
+
+  end
+
+  def fetch_padding_mask(mask = nil)
+    current = Registry['lcc_padding_mask']
+
+    # check if given mask has any larger value
+    updated = []
+    if mask
+      mask.each_with_index do |mask_value, idx|
+        updated << [
+                     current[idx].to_i,
+                     mask_value
+                   ].max
+      end
+
+      if updated != current
+        # need to update registry
+        # need to update all books
+      end
+    end
+
+    current
+  end
+
+  # TODO: same process for max int length.
+  # maybe can do that just with a db query?
+
   def self.update_lcc_sorts
     books = Book.all
     all_unpadded_parts = []
