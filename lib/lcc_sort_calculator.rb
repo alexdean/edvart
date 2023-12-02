@@ -56,7 +56,9 @@ class LccSortCalculator
     # since we're using them for sorting
     max_length = all_unpadded_ints.map{|u| u.to_s.size }.max
 
-    all_padded_ints = pad_ints(all_unpadded_ints, max_length)
+    all_padded_ints = all_unpadded_ints.map do |unpadded_int|
+                        pad_int(unpadded_ints, max_length)
+                      end
 
     books.each_with_index do |book, idx|
       book.update!(lcc_sort: all_padded_ints[idx])
@@ -179,10 +181,8 @@ class LccSortCalculator
     joined.to_i(36)
   end
 
-  def self.pad_ints(all_unpadded_ints, length)
-    all_unpadded_ints.map do |unpadded_int|
-      unpadded_int.to_s.rjust(length, '0')
-    end
+  def self.pad_int(unpadded_int, length)
+    unpadded_int.to_s.rjust(length, '0')
   end
 
   private

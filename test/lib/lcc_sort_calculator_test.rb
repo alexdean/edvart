@@ -50,7 +50,9 @@ describe LccSortCalculator do
 
     # integers will be stored as blobs. shorter values need to be 0-padded to the same length.
     max_length = all_unpadded_ints.map{|u| u.to_s.size }.max
-    all_padded_ints = LccSortCalculator.pad_ints(all_unpadded_ints, max_length)
+    all_padded_ints = all_unpadded_ints.map do |unpadded_int|
+                        LccSortCalculator.pad_int(unpadded_int, max_length)
+                      end
     expected = [
       '144279630315185578995',
       '052133694819783960785'
@@ -151,24 +153,15 @@ describe LccSortCalculator do
     end
   end
 
-  describe '.pad_ints' do
+  describe '.pad_int' do
     it 'ensures all numeric strings are padded to the same length' do
-      unpadded_ints = [
-        'A0011A00'.to_i(36),
-        'ZZZZZZZZ'.to_i(36)
-      ]
-      expected = [
-         783643380192,
-        2821109907455
-      ]
-      assert_equal(expected, unpadded_ints)
+      subject = 'A0011A00'.to_i(36)
+      assert_equal(   783643380192, subject)
+      assert_equal('00783643380192', LccSortCalculator.pad_int(subject, 14))
 
-      padded_ints = LccSortCalculator.pad_ints(unpadded_ints, 14)
-      expected = [
-        '00783643380192',
-        '02821109907455'
-      ]
-      assert_equal(expected, padded_ints)
+      subject = 'ZZZZZZZZ'.to_i(36)
+      assert_equal(  2821109907455, subject)
+      assert_equal('02821109907455', LccSortCalculator.pad_int(subject, 14))
     end
   end
 
