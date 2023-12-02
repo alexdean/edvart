@@ -29,6 +29,7 @@ ActiveRecord::Base.establish_connection(
 ActiveRecord::Base.connection.execute "DROP TABLE IF EXISTS source_urls"
 ActiveRecord::Base.connection.execute "DROP TABLE IF EXISTS local_resources"
 ActiveRecord::Base.connection.execute "DROP TABLE IF EXISTS books"
+ActiveRecord::Base.connection.execute "DROP TABLE IF EXISTS registry"
 
 ActiveRecord::Base.connection.execute <<~EOF
 CREATE TABLE "books" (
@@ -67,5 +68,15 @@ ActiveRecord::Base.connection.execute <<~EOF
     "created_at" datetime NOT NULL,
     "updated_at" datetime NOT NULL,
     FOREIGN KEY(book_id) REFERENCES books(id)
+  )
+EOF
+
+ActiveRecord::Base.connection.execute <<~EOF
+  CREATE TABLE registry (
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "key_name" TEXT NOT NULL,
+    "marshalled" text NOT NULL,
+    "created_at" datetime NOT NULL,
+    "updated_at" datetime NOT NULL
   )
 EOF
