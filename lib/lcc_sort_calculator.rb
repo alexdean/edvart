@@ -45,25 +45,15 @@ class LccSortCalculator
   def self.lcc_parts(lcc)
     output = []
 
-    # ascii ranges
-    letters = 65..90
-    numbers = 48..57
-
     current_group_type = nil
     current_group = ''
     lcc.to_s.chars.each_with_index do |c|
-      if c.bytes.size > 1
+      if AsciiUtil.multibyte?(c)
         raise "LCC '#{lcc}' contains multibyte character '#{c}'."
       end
 
       normalized = c.upcase
-      type = if letters.include?(normalized.bytes[0])
-               :letter
-             elsif numbers.include?(normalized.bytes[0])
-               :number
-             else
-               :other
-             end
+      type = AsciiUtil.classify(normalized.bytes[0])
 
       # init on first iteration only
       if current_group_type.nil?
@@ -147,8 +137,13 @@ class LccSortCalculator
   # @param all_padded_parts [Array<String>] an array strings
   # @return [Integer]
   def self.integerize_parts(padded_parts)
+    joined = padded_parts.join
+    # TODO: maybe substitute a 0 rather than raising?
+    if !AsciiUtil.valid_base36?(joined)
+      raise "'#{padded_parts}' cannot be encoded as base36."
+    end
 
-    padded_parts.join.to_i(36)
+    joined.to_i(36)
   end
 
   def self.pad_ints(all_unpadded_ints, length)

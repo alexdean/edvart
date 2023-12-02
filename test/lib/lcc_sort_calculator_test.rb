@@ -144,6 +144,11 @@ describe LccSortCalculator do
       assert_equal(10, LccSortCalculator.integerize_parts(['A']))
       assert_equal(35, LccSortCalculator.integerize_parts(['Z']))
     end
+
+    it 'raises if any parts are not valid for encoding as base36' do
+      e = assert_raises { LccSortCalculator.integerize_parts(['.']) }
+      assert_equal('\'["."]\' cannot be encoded as base36.', e.message)
+    end
   end
 
   describe '.pad_ints' do
