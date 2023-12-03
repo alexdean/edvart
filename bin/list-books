@@ -5,7 +5,7 @@ require_relative '../config/init'
 
 books = []
 
-Book.all.order(:lcc_sort).each do |book|
+Book.all.order(:lcc_sort_order, :title).each do |book|
   books << [book.lcc, book.title, book.author]
 end
 

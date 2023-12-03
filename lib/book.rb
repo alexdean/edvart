@@ -15,6 +15,10 @@ class Book < ApplicationRecord
     LccSortCalculator.instance.full_update_if_needed(self)
   end
 
+  def self.refresh_sort_order!
+    LccSortCalculator.instance.full_update
+  end
+
   # initialize a Book and add data to it.
   # designed to only add data, so a `nil` value will not replace a non-nil value.
   #

@@ -13,14 +13,6 @@ class AsciiUtil
     end
   end
 
-  def self.valid_base36?(string)
-    if !string.is_a?(String)
-      return false
-    end
-
-    string.match?(/^[a-zA-Z0-9]*$/)
-  end
-
   def self.multibyte?(string)
     string.bytes.size > 1
   end

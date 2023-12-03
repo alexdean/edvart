@@ -5,12 +5,16 @@ class LccSortCalculator
     @in_full_update = false
   end
 
-  def full_update_if_needed(book)
+  def full_update
+    full_update_if_needed(nil, force: true)
+  end
+
+  def full_update_if_needed(book, force: false)
     if @in_full_update
       return false
     end
 
-    full_update_needed = update_registered_padding_values(book)
+    full_update_needed = update_registered_padding_values(book, force: force)
     full_update_was_performed = false
 
     if full_update_needed
@@ -29,11 +33,11 @@ class LccSortCalculator
   #
   # return true if any registry values were changed
   # which means all lcc_sort_order values need to be re-calculated
-  def update_registered_padding_values(books)
-    full_update_needed = false
+  def update_registered_padding_values(books, force: false)
+    full_update_needed = force
 
-    # if registry is missing data (first run or corruption) we need to check all books.
-    if Registry.lcc_part_padding_mask == [] || Registry.lcc_sort_order_size == 0
+    # if registry is missing data (first run or corruption) or forcing full update, we need to check all books.
+    if Registry.lcc_part_padding_mask == [] || Registry.lcc_sort_order_size == 0 || force
       books = Book.all
     end
 
@@ -58,27 +62,6 @@ class LccSortCalculator
       full_update_needed = true
     end
 
-    # apply padding to individual parts
-    all_padded_parts = all_unpadded_parts.map do |unpadded_parts|
-                         pad_parts(unpadded_parts, padding_mask)
-                       end
-
-    # convert padded parts to ints
-    all_unpadded_ints = all_padded_parts.map do |padded_parts|
-                          integerize_parts(padded_parts)
-                        end
-
-    # the final lcc values will be stored as BLOBs
-    # we need to pad shorter numeric strings to ensure all BLOBs have the same size
-    # since we're using them for sorting
-    max_length = all_unpadded_ints.map{|u| u.to_s.size }.max
-
-    registered = Registry.lcc_sort_order_size
-    if max_length > registered
-      Registry.lcc_sort_order_size = registered = max_length
-      full_update_needed = true
-    end
-
     full_update_needed
   end
 
@@ -88,8 +71,7 @@ class LccSortCalculator
 
     Array(books).each_with_index do |book, idx|
       padded_parts = pad_parts(book.lcc_parts, part_padding_mask)
-      integer = integerize_parts(padded_parts)
-      book.lcc_sort_order = pad_int(integer, lcc_sort_order_size)
+      book.lcc_sort_order = padded_parts.join
     end
 
     books
@@ -189,27 +171,6 @@ class LccSortCalculator
         unpadded.to_s.rjust(padding_length, '0')
       end
     end
-  end
-
-  # convert padded parts into a single number
-  #
-  # by treating the joined parts as a base36 numeric string
-  # base36 is used because all LCC values A-Z0-9 are valid base36 digits.
-  #
-  # @param all_padded_parts [Array<String>] an array strings
-  # @return [Integer]
-  def integerize_parts(padded_parts)
-    joined = padded_parts.join('')
-    # TODO: maybe substitute a 0 rather than raising?
-    if !AsciiUtil.valid_base36?(joined)
-      raise "'#{padded_parts}' cannot be encoded as base36."
-    end
-
-    joined.to_i(36)
-  end
-
-  def pad_int(unpadded_int, length)
-    unpadded_int.to_s.rjust(length, '0')
   end
 
   private

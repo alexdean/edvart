@@ -38,7 +38,7 @@ CREATE TABLE "books" (
   "title" text,
   "author" text,
   "lcc" text,
-  "lcc_sort_order" BLOB,
+  "lcc_sort_order" TEXT,
   "source_url" text,
   "created_at" datetime NOT NULL,
   "updated_at" datetime,

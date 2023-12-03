@@ -42,28 +42,6 @@ describe LccSortCalculator do
       ['B0', '358', 'G', '078', '1975']
     ]
     assert_equal(expected, all_padded_parts)
-
-    # all lccs are now the same length, and each position has equivalent significance.
-    # join and convert them into a single integer
-    all_unpadded_ints = all_padded_parts.map do |padded_parts|
-                          @subject.integerize_parts(padded_parts)
-                        end
-    expected = [
-      144279630315185578995,
-       52133694819783960785
-    ]
-    assert_equal(expected, all_unpadded_ints)
-
-    # integers will be stored as blobs. shorter values need to be 0-padded to the same length.
-    max_length = all_unpadded_ints.map{|u| u.to_s.size }.max
-    all_padded_ints = all_unpadded_ints.map do |unpadded_int|
-                        @subject.pad_int(unpadded_int, max_length)
-                      end
-    expected = [
-      '144279630315185578995',
-      '052133694819783960785'
-    ]
-    assert_equal(expected, all_padded_ints)
   end
 
   describe '.full_update_if_needed' do
@@ -161,40 +139,6 @@ describe LccSortCalculator do
       mask = [3, 2, 3]
       actual = @subject.pad_parts(['B', 'B'], mask)
       assert_equal(['B00', 'B0', '000'], actual)
-    end
-  end
-
-  describe '.integerize_parts' do
-    it 'creates an integer from each item' do
-      actual = @subject.integerize_parts(['A00', '11', 'A00'])
-      assert_equal('A0011A00'.to_i(36), actual)
-
-      actual = @subject.integerize_parts(['B1B', 'B2', '543'])
-      assert_equal('B1BB2543'.to_i(36), actual)
-    end
-
-    it 'has more examples' do
-      assert_equal(0, @subject.integerize_parts(['0']))
-      assert_equal(9, @subject.integerize_parts(['9']))
-      assert_equal(10, @subject.integerize_parts(['A']))
-      assert_equal(35, @subject.integerize_parts(['Z']))
-    end
-
-    it 'raises if any parts are not valid for encoding as base36' do
-      e = assert_raises { @subject.integerize_parts(['.']) }
-      assert_equal('\'["."]\' cannot be encoded as base36.', e.message)
-    end
-  end
-
-  describe '.pad_int' do
-    it 'ensures all numeric strings are padded to the same length' do
-      subject = 'A0011A00'.to_i(36)
-      assert_equal(   783643380192, subject)
-      assert_equal('00783643380192', @subject.pad_int(subject, 14))
-
-      subject = 'ZZZZZZZZ'.to_i(36)
-      assert_equal(  2821109907455, subject)
-      assert_equal('02821109907455', @subject.pad_int(subject, 14))
     end
   end
 
