@@ -2,11 +2,19 @@ class Book < ApplicationRecord
   has_many :source_urls
   has_many :local_resources
 
+  attr_reader :lcc_parts
+
   validates :isbn, uniqueness: true
 
   before_validation do
     # most barcodes are ISBNs
     self.barcode ||= self.isbn
+
+    LccSortCalculator.instance.set_lcc_sort_order(self)
+  end
+
+  after_commit do
+    LccSortCalculator.instance.full_update_if_needed(self)
   end
 
   # initialize a Book and add data to it.
@@ -37,5 +45,11 @@ class Book < ApplicationRecord
     if local_resource && !self.local_resources.where(path: local_resource).exists?
       self.local_resources.build(path: local_resource)
     end
+  end
+
+  def lcc=(value)
+    super
+    @lcc_parts = LccSortCalculator.instance.lcc_parts(value)
+    value
   end
 end

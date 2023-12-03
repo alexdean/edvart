@@ -1,6 +1,18 @@
 require 'test_helper'
 
 describe Book do
+  describe 'callbacks' do
+    describe 'before_validation' do
+      it 'sets barcode from isbn if barcode is empty'
+      it 'does not override a non-empty barcode'
+      it 'sets lcc_sort_order'
+    end
+
+    describe 'after_commit' do
+      it 'tells LccSortCalculator to perform a full update if needed'
+    end
+  end
+
   describe '.from_api_data' do
     describe 'when isbn is not already in db' do
       it 'initializes a new instance' do
@@ -79,5 +91,9 @@ describe Book do
         assert_equal ['local_resource', 'path2'], subject.local_resources.map(&:path)
       end
     end
+  end
+
+  describe '#lcc=' do
+    it 'sets lcc_parts'
   end
 end

@@ -14,7 +14,11 @@ class AsciiUtil
   end
 
   def self.valid_base36?(string)
-    string.to_s.match?(/^[a-zA-Z0-9]+$/)
+    if !string.is_a?(String)
+      return false
+    end
+
+    string.match?(/^[a-zA-Z0-9]*$/)
   end
 
   def self.multibyte?(string)

@@ -16,4 +16,24 @@ describe Registry do
     Registry['now'] = now
     assert_equal now, Registry['now']
   end
+
+  describe '.lcc_part_padding_mask' do
+    it 'returns empty array if no value is set'
+    it 'returns stored value'
+  end
+
+  describe '.lcc_part_padding_mask=' do
+    it 'sets given value in registry'
+    it 'raises if given a non-Array'
+  end
+
+  describe '.lcc_sort_order_size' do
+    it 'returns 0 if no value is set'
+    it 'returns stored value'
+  end
+
+  describe '.lcc_sort_order_size=' do
+    it 'sets given value in registry'
+    it 'raises if given a non-Integer'
+  end
 end

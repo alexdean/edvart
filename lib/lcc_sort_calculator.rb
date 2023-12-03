@@ -1,45 +1,58 @@
 class LccSortCalculator
-  def calculate_lcc_sort(book_lcc)
-    parts = lcc_parts(book_lcc)
-    this_padding_mask = lcc_padding_mask([parts])
+  include Singleton
 
-    padding_mask = fetch_padding_mask(this_padding_mask)
-
+  def initialize
+    @in_full_update = false
   end
 
-  def fetch_padding_mask(mask = nil)
-    current = Registry['lcc_padding_mask']
+  def full_update_if_needed(book)
+    return false if @in_full_update
 
-    # check if given mask has any larger value
-    updated = []
-    if mask
-      mask.each_with_index do |mask_value, idx|
-        updated << [
-                     current[idx].to_i,
-                     mask_value
-                   ].max
-      end
+    full_update_was_performed = false
+    Book.transaction do
+      full_update_needed = update_registered_padding_values(book)
 
-      if updated != current
-        # need to update registry
-        # need to update all books
+      if full_update_needed
+        @in_full_update = true
+        # TODO: why does this error if we don't exclude current book?
+        all_books = Book.where.not(id: book.id)
+        set_lcc_sort_order(all_books)
+        all_books.each(&:save!)
+        @in_full_update = false
+        full_update_was_performed = true
       end
     end
 
-    current
+    full_update_was_performed
   end
 
-  # TODO: same process for max int length.
-  # maybe can do that just with a db query?
+  # update padding values in registry if needed
+  #
+  # return true if any registry values were changed
+  # which means all lcc_sort_order values need to be re-calculated
+  def update_registered_padding_values(books)
+    full_update_needed = false
 
-  def self.update_lcc_sorts
-    books = Book.all
     all_unpadded_parts = []
-    books.each do |book|
-      all_unpadded_parts << lcc_parts(book.lcc)
+    Array(books).each do |book|
+      all_unpadded_parts << book.lcc_parts
     end
 
     padding_mask = lcc_padding_mask(all_unpadded_parts)
+
+    registered = Registry.lcc_part_padding_mask
+
+    # new padding_mask is longer than registered, or has a larger value at any position
+    needs_update = if padding_mask.size > registered.size
+                     true
+                   else
+                     idx = -1
+                     padding_mask.any? { |p| idx += 1; r = registered[idx].to_i; p > r }
+                   end
+    if needs_update
+      Registry.lcc_part_padding_mask = padding_mask
+      full_update_needed = true
+    end
 
     # apply padding to individual parts
     all_padded_parts = all_unpadded_parts.map do |unpadded_parts|
@@ -56,12 +69,23 @@ class LccSortCalculator
     # since we're using them for sorting
     max_length = all_unpadded_ints.map{|u| u.to_s.size }.max
 
-    all_padded_ints = all_unpadded_ints.map do |unpadded_int|
-                        pad_int(unpadded_ints, max_length)
-                      end
+    registered = Registry.lcc_sort_order_size
+    if max_length > registered
+      Registry.lcc_sort_order_size = registered = max_length
+      full_update_needed = true
+    end
 
-    books.each_with_index do |book, idx|
-      book.update!(lcc_sort: all_padded_ints[idx])
+    full_update_needed
+  end
+
+  def set_lcc_sort_order(books)
+    part_padding_mask = Registry.lcc_part_padding_mask
+    lcc_sort_order_size = Registry.lcc_sort_order_size
+
+    Array(books).each_with_index do |book, idx|
+      padded_parts = pad_parts(book.lcc_parts, part_padding_mask)
+      integer = integerize_parts(padded_parts)
+      book.lcc_sort_order = pad_int(integer, lcc_sort_order_size)
     end
 
     books
@@ -77,7 +101,7 @@ class LccSortCalculator
   #
   # @param lcc [String] the LCC string to split
   # @return [Array] an array of parts
-  def self.lcc_parts(lcc)
+  def lcc_parts(lcc)
     output = []
 
     current_group_type = nil
@@ -125,7 +149,7 @@ class LccSortCalculator
   #
   # @param all_unpadded_parts [Array<Array>] an array of arrays of parts
   # @return [Array<Integer>]
-  def self.lcc_padding_mask(all_unpadded_parts)
+  def lcc_padding_mask(all_unpadded_parts)
     mask = []
     all_unpadded_parts.each do |parts|
       parts.each_with_index do |part, idx|
@@ -150,12 +174,11 @@ class LccSortCalculator
   # @param unpadded_parts [Array] an array of parts
   # @param padding_mask [Array<Integer>] an array of padding lengths
   # @return [Array<String>] an array of padded parts
-  def self.pad_parts(unpadded_parts, padding_mask)
+  def pad_parts(unpadded_parts, padding_mask)
     idx = -1
     padding_mask.map do |padding_length|
       idx += 1
       unpadded = unpadded_parts[idx]
-
       if unpadded.is_a?(String)
         unpadded.ljust(padding_length, '0')
       else
@@ -171,8 +194,8 @@ class LccSortCalculator
   #
   # @param all_padded_parts [Array<String>] an array strings
   # @return [Integer]
-  def self.integerize_parts(padded_parts)
-    joined = padded_parts.join
+  def integerize_parts(padded_parts)
+    joined = padded_parts.join('')
     # TODO: maybe substitute a 0 rather than raising?
     if !AsciiUtil.valid_base36?(joined)
       raise "'#{padded_parts}' cannot be encoded as base36."
@@ -181,13 +204,13 @@ class LccSortCalculator
     joined.to_i(36)
   end
 
-  def self.pad_int(unpadded_int, length)
+  def pad_int(unpadded_int, length)
     unpadded_int.to_s.rjust(length, '0')
   end
 
   private
 
-  def self.lcc_parts_finalize_group(group, group_type, to:)
+  def lcc_parts_finalize_group(group, group_type, to:)
     output = to
 
     if group_type == :number
@@ -197,11 +220,11 @@ class LccSortCalculator
     end
   end
 
-  # def self.lcc_sort(books)
+  # def lcc_sort(books)
   #   books.sort { |a,b| lcc_sort_items(a, b) }
   # end
 
-  # def self.lcc_sort_items(book_a, book_b)
+  # def lcc_sort_items(book_a, book_b)
   #   book_a_lcc_parts = book_a.lcc_parts
   #   book_b_lcc_parts = book_b.lcc_parts
 
