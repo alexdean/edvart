@@ -96,4 +96,10 @@ describe Book do
   describe '#lcc=' do
     it 'sets lcc_parts'
   end
+
+  describe '#lcc_parts' do
+    it 'returns empty array if lcc is nil' do
+      assert_equal([], Book.new.lcc_parts)
+    end
+  end
 end

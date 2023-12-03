@@ -2,8 +2,6 @@ class Book < ApplicationRecord
   has_many :source_urls
   has_many :local_resources
 
-  attr_reader :lcc_parts
-
   validates :isbn, uniqueness: true
 
   before_validation do
@@ -49,7 +47,11 @@ class Book < ApplicationRecord
 
   def lcc=(value)
     super
-    @lcc_parts = LccSortCalculator.instance.lcc_parts(value)
+    @lcc_parts = LccSortCalculator.instance.lcc_parts(lcc)
     value
+  end
+
+  def lcc_parts
+    @lcc_parts ||= LccSortCalculator.instance.lcc_parts(lcc)
   end
 end

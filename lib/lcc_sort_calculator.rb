@@ -6,21 +6,20 @@ class LccSortCalculator
   end
 
   def full_update_if_needed(book)
-    return false if @in_full_update
+    if @in_full_update
+      return false
+    end
 
+    full_update_needed = update_registered_padding_values(book)
     full_update_was_performed = false
-    Book.transaction do
-      full_update_needed = update_registered_padding_values(book)
 
-      if full_update_needed
-        @in_full_update = true
-        # TODO: why does this error if we don't exclude current book?
-        all_books = Book.where.not(id: book.id)
-        set_lcc_sort_order(all_books)
-        all_books.each(&:save!)
-        @in_full_update = false
-        full_update_was_performed = true
-      end
+    if full_update_needed
+      @in_full_update = true
+      all_books = Book.all
+      set_lcc_sort_order(all_books)
+      all_books.each(&:save!)
+      @in_full_update = false
+      full_update_was_performed = true
     end
 
     full_update_was_performed
@@ -32,6 +31,11 @@ class LccSortCalculator
   # which means all lcc_sort_order values need to be re-calculated
   def update_registered_padding_values(books)
     full_update_needed = false
+
+    # if registry is missing data (first run or corruption) we need to check all books.
+    if Registry.lcc_part_padding_mask == [] || Registry.lcc_sort_order_size == 0
+      books = Book.all
+    end
 
     all_unpadded_parts = []
     Array(books).each do |book|

@@ -125,6 +125,11 @@ describe LccSortCalculator do
       e = assert_raises { @subject.lcc_parts("ABC💀DEF") }
       assert_equal "LCC 'ABC💀DEF' contains multibyte character '💀'.", e.message
     end
+
+    it 'returns empty array for nil lcc' do
+      assert_equal [], @subject.lcc_parts('')
+      assert_equal [], @subject.lcc_parts(nil)
+    end
   end
 
   describe '.lcc_padding_mask' do
